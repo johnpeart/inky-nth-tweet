@@ -63,13 +63,13 @@ The code outputs two styles: text only and media only.
 
 Your display should update to look something like this:
 
-![](https://github.com/johnpeart/inky-nth-tweet/blob/master/screenshot-text.jpg)
+![](https://github.com/johnpeart/inky-nth-tweet/blob/master/screenshot-text.png)
 
 ### Media only output
 
 Your display should update to look something like this:
 
-![](https://github.com/johnpeart/inky-nth-tweet/blob/master/screenshot-media.jpg)
+![](https://github.com/johnpeart/inky-nth-tweet/blob/master/screenshot-media.png)
 
 ## Things to do
 
