@@ -8,6 +8,7 @@ import sys # This module provides access to some variables used or maintained by
 import datetime # The datetime module supplies classes for manipulating dates and times.
 import argparse # Enables you to pass arguments through terminal
 import random # Enables picking randomin choices from lists
+import re # Strips text easily
 import keys # This module stores API credentials for use with the Twitter Developer API
 from accounts import accounts # This module stores a list of accounts to check
 import twitter # This module handles interactions with the Twitter Developer API
@@ -98,6 +99,7 @@ else:
 now = datetime.datetime.now()
 
 tweetFontSize = 16
+tweetSmallFontSize = 10
 accountFontSize = 20
 statsFontSize = 24
 
@@ -109,6 +111,7 @@ statsFontSize = 24
 # 2. font size - as an integer
 
 tweetFont = ImageFont.truetype("fonts/Regular.ttf", tweetFontSize)
+tweetSmallFont = ImageFont.truetype("fonts/Regular.ttf", tweetSmallFontSize)
 accountFont = ImageFont.truetype("fonts/Bold.ttf", accountFontSize)
 statsFont = ImageFont.truetype("fonts/Bold.ttf", statsFontSize)
 
@@ -131,6 +134,7 @@ def reflow_text(textToReflow, width, font):
     words = textToReflow.split(" ")
     reflowed = ''
     line_length = 0
+    line_count = 0
 
     for i in range(len(words)):
         word = words[i] + " "
@@ -142,6 +146,7 @@ def reflow_text(textToReflow, width, font):
         else:
             line_length = word_length
             reflowed = reflowed[:-1] + "\n" + word
+            line_count += line_count + 1
 
     return reflowed
 
@@ -171,6 +176,7 @@ def getUserTimeline(handle, number):
 if __name__ == "__main__":
     tweet = getUserTimeline(twitterUsername, nthTweet)
     text = tweet[0]
+    text = re.sub(r"http\S+", "", text)
     media = tweet[1]
     if media != None:
         if media[0].type == "photo":
@@ -228,33 +234,49 @@ if media != None:
     cropping = cropImage(img)
     img = cropping[0]
     img = img.crop((cropping[1], cropping[2], cropping[3], cropping[4]))
-    pal_img = Image.new("P", (1, 1))
-    pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)
-    img = img.convert("RGB").quantize(palette=pal_img)
 elif urls != None:
     print('Output is "urls"')
     page = urllib2.urlopen(urls)
     soup = BeautifulSoup(page, 'html.parser')
     scrapedImage = soup.find('meta', attrs={'name': 'twitter:image'})
-    print('Found an image:', scrapedImage['content'])
-    response = requests.get(scrapedImage['content'])
-    img = Image.open(StringIO(response.content))
-    cropping = cropImage(img)
-    img = cropping[0]
-    img = img.crop((cropping[1], cropping[2], cropping[3], cropping[4]))
-    pal_img = Image.new("P", (1, 1))
-    pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)
-    img = img.convert("RGB").quantize(palette=pal_img)
+    if scrapedImage['content'] != None:
+        print('Found an image:', scrapedImage['content'])
+        response = requests.get(scrapedImage['content'])
+        img = Image.open(StringIO(response.content))
+        cropping = cropImage(img)
+        img = cropping[0]
+        img = img.crop((cropping[1], cropping[2], cropping[3], cropping[4]))
+        draw = ImageDraw.Draw(img)
+        reflowed_tweet = reflow_text(text, (displayWidth - 30), tweetSmallFont)
+        tweetTextWidth, tweetTextHeight = tweetFont.getsize(reflowed_tweet)
+        print("Text height: ", tweetTextHeight)
+        x0 = 10
+        y0 = displayHeight - tweetTextHeight - bannerHeight - bannerBorderThickness - 20
+        x1 = displayWidth - 10
+        y1 = displayHeight - bannerHeight - 10
+        textX0 = x0 + 5
+        textY0 = displayHeight - tweetTextHeight - bannerHeight - bannerBorderThickness - 15
+        draw.rectangle([(x0, y0), (x1, y1)], fill = white, outline=None)
+        draw.text((textX0, textY0), reflowed_tweet, black, tweetFont)
+    else:
+        print('No image found. Reverting output to text only')
+        img = Image.new("P", (displayWidth, displayHeight))
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([(0, 0), (displayWidth, displayHeight)], fill = white, outline=None)
+        reflowed_tweet = reflow_text(text, displayWidth, tweetFont)
+        draw.text((0, 0), reflowed_tweet, black, tweetFont)
 else:
     print('Output is "text"')
     img = Image.new("P", (displayWidth, displayHeight))
     draw = ImageDraw.Draw(img)
     draw.rectangle([(0, 0), (displayWidth, displayHeight)], fill = white, outline=None)
-    reflowed_tweet = reflow_text(tweet[0], displayWidth, tweetFont)
+    reflowed_tweet = reflow_text(text, displayWidth, tweetFont)
     draw.text((0, 0), reflowed_tweet, black, tweetFont)
     tweetTextWidth, tweetTextHeight = accountFont.getsize(reflowed_tweet)
-    pal_img = Image.new("P", (1, 1))
-    pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)
+
+pal_img = Image.new("P", (1, 1))
+pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)
+img = img.convert("RGB").quantize(palette=pal_img)
 
 # This section renders the bar at the bottom of the screen
 
@@ -269,8 +291,8 @@ ImageDraw.Draw(img).rectangle([(0, displayHeight - bannerHeight), (displayWidth,
 img.paste(rtImage, (int(bannerPadding), iconVHeight))
 ImageDraw.Draw(img).text((int(bannerPadding + (resizedIcon * 1.25)), statsVHeight), str(retweets), yellow, statsFont)
 
-img.paste(likeImage, (int((displayWidth * 1/3) + bannerPadding), iconVHeight))
-ImageDraw.Draw(img).text(((displayWidth * 1/3) + bannerPadding + (resizedIcon * 1.25), statsVHeight), str(likes), yellow, statsFont)
+img.paste(likeImage, (int((displayWidth * 0.3) + bannerPadding), iconVHeight))
+ImageDraw.Draw(img).text(((displayWidth * 0.3) + bannerPadding + (resizedIcon * 1.25), statsVHeight), str(likes), yellow, statsFont)
 
 accountFontWidth, accountFontHeight = accountFont.getsize(twitterUsernameString)
 accountVHeight = displayHeight - (bannerHeight / 2) - (accountFontHeight * 0.5)
