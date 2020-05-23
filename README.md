@@ -57,17 +57,23 @@ python inky-twitter.py -u twitter -n 5 -t True
 
 ## Screenshots
 
-The code outputs two styles: text only and media only.
+The code outputs three styles: text only, Cards and media only.
 
 ### Text only output
 
-Your display should update to look something like this:
+If a tweet does not contain a URL that links to a page that has a `<meta name="twitter:image">` tag that has a valid image *and* it does not have a `media` attachment that is a static image, your display should update to look something like this:
 
 ![](https://github.com/johnpeart/inky-nth-tweet/blob/master/screenshot-text.png)
 
+### Cards output
+
+If a tweet contains a URL that links to a page that has a `<meta name="twitter:image">` tag that has a valid image *and* it does not have a `media` attachment that is a static image, your display should update to look something like this:
+
+![](https://github.com/johnpeart/inky-nth-tweet/blob/master/screenshot-cards.png)
+
 ### Media only output
 
-Your display should update to look something like this:
+If a tweet has a `media` attachment that is a static image, your display should update to look something like this: 
 
 ![](https://github.com/johnpeart/inky-nth-tweet/blob/master/screenshot-media.png)
 
