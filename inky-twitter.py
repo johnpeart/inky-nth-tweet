@@ -11,8 +11,10 @@ import random # Enables picking randomin choices from lists
 import keys # This module stores API credentials for use with the Twitter Developer API
 from accounts import accounts # This module stores a list of accounts to check
 import twitter # This module handles interactions with the Twitter Developer API
+from bs4 import BeautifulSoup # This module helps with parsing HTML
+import urllib2 # This module helps with getting stuff from the interwebs
 from PIL import Image, ImageFont, ImageDraw # This module handles creation of images and text, which are sent to the display
-import requests
+import requests # This module helps with getting stuff from the interwebs
 from StringIO import StringIO
 from inky import InkyWHAT # This module makes the e-ink display work and renders the image
 
@@ -20,7 +22,7 @@ from inky import InkyWHAT # This module makes the e-ink display work and renders
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--test", "-t", type=bool, default=False, help="Set to 'true' to output to local PNG instead of to the display")
-parser.add_argument("--randomuser", "-r", type=bool, default=True, help="By default, this app picks a random account from a list to display a tweet. Set to 'False' to pick a specific username.")
+parser.add_argument("--randomuser", "-r", type=bool, default=False, help="By default, this app picks a random account from a list to display a tweet. Set to 'False' to pick a specific username.")
 parser.add_argument("--username", "-u", type=str, help="Your Twitter handle without the @ symbol", default="unsplash")
 parser.add_argument("--nth", "-n", nargs="?", type=int, help="Get the nth latest tweet", default=1)
 parser.add_argument("--colour", "-c", nargs="?", type=str, help="Set colour of the display", default="yellow")
@@ -34,7 +36,7 @@ if args.randomuser == True:
     twitterUsername = random.choice(list(accounts))
 else:    
     twitterUsername = args.username
-    
+
 twitterUsernameString = "@{}".format(twitterUsername)
 nthTweet = args.nth - 1 # API returns zero-based numbers, so the latest tweet to the end user would be n = 1 but should really be 0.
 
@@ -162,13 +164,13 @@ def human_format(num):
 ####################
 # For each account defined in 'accounts.py', this function gets the latest tweet and prepares it for rendering.
 
-def displayTweet(handle):
+def getUserTimeline(handle, number):
     statuses = api.GetUserTimeline(screen_name=handle, exclude_replies=True, include_rts=False)
-    return statuses[nthTweet].full_text, statuses[nthTweet].media, statuses[nthTweet].retweet_count, statuses[nthTweet].favorite_count
+    return statuses[number].full_text, statuses[number].media, statuses[number].retweet_count, statuses[number].favorite_count, statuses[number].id, statuses[number].urls
 
 if __name__ == "__main__":
-    tweet = displayTweet(twitterUsername)
-    status = tweet[0]
+    tweet = getUserTimeline(twitterUsername, nthTweet)
+    text = tweet[0]
     media = tweet[1]
     if media != None:
         if media[0].type == "photo":
@@ -177,7 +179,13 @@ if __name__ == "__main__":
             media = None
     retweets = human_format(tweet[2])
     likes = human_format(tweet[3])
-    print('Status: ', status, 'Media: ', media, 'Retweets: ', retweets, 'Likes: ', likes)
+    id = tweet[4]
+    urls = tweet[5]
+    if urls != None:
+        urls = urls[0].expanded_url
+    else:
+        urls = None
+    print('text: ', text, 'Media: ', media, 'Retweets: ', retweets, 'Likes: ', likes, 'ID: ', id, 'URLs: ', urls)
 
 ########################
 ## RENDER THE CONTENT ##
@@ -189,9 +197,8 @@ if __name__ == "__main__":
 #    If the tweet does not have media, generates a full screen stylised image of the tweet's text
 # 3. Creates a bar at the bottom of the screen showing the number of retweets and favourites/likes
 
-if media != None:
-    response = requests.get(mediaURL)
-    img = Image.open(StringIO(response.content))
+def cropImage(imageToProcess):
+    img = imageToProcess
     mediaWidth, mediaHeight = img.size
     if mediaWidth >= mediaHeight:
         mediaHeightNew = displayHeight
@@ -211,11 +218,35 @@ if media != None:
         x1 = mediaWidthNew
         y0 = (mediaHeightNew - mediaHeightCropped) / 2
         y1 = y0 + mediaHeightCropped
-    img = img.crop((x0, y0, x1, y1))
+    return img, x0, y0, x1, y1
+
+if media != None:
+    print('Output is "media"')
+    response = requests.get(mediaURL)
+    print('Found an image:', mediaURL)
+    img = Image.open(StringIO(response.content))
+    cropping = cropImage(img)
+    img = cropping[0]
+    img = img.crop((cropping[1], cropping[2], cropping[3], cropping[4]))
+    pal_img = Image.new("P", (1, 1))
+    pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)
+    img = img.convert("RGB").quantize(palette=pal_img)
+elif urls != None:
+    print('Output is "urls"')
+    page = urllib2.urlopen(urls)
+    soup = BeautifulSoup(page, 'html.parser')
+    scrapedImage = soup.find('meta', attrs={'name': 'twitter:image'})
+    print('Found an image:', scrapedImage['content'])
+    response = requests.get(scrapedImage['content'])
+    img = Image.open(StringIO(response.content))
+    cropping = cropImage(img)
+    img = cropping[0]
+    img = img.crop((cropping[1], cropping[2], cropping[3], cropping[4]))
     pal_img = Image.new("P", (1, 1))
     pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)
     img = img.convert("RGB").quantize(palette=pal_img)
 else:
+    print('Output is "text"')
     img = Image.new("P", (displayWidth, displayHeight))
     draw = ImageDraw.Draw(img)
     draw.rectangle([(0, 0), (displayWidth, displayHeight)], fill = white, outline=None)
@@ -270,6 +301,8 @@ inky.set_border(white)
 # Once you've prepared and set your image, and chosen a border colour, you can update your e-ink display with .show()
 
 if test == True:
+    print('Updating local image')
     img.save("debug.png")
 else:
+    print('Updating Inky wHAT display')
     inky.show()
