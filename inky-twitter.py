@@ -7,6 +7,7 @@
 import sys # This module provides access to some variables used or maintained by the interpreter and to functions that interact strongly with the interpreter. It is always available.
 import datetime # The datetime module supplies classes for manipulating dates and times.
 import argparse # Enables you to pass arguments through terminal
+import random # Enables picking randomin choices from lists
 import keys # This module stores API credentials for use with the Twitter Developer API
 from accounts import accounts # This module stores a list of accounts to check
 import twitter # This module handles interactions with the Twitter Developer API
@@ -18,8 +19,8 @@ from inky import InkyWHAT # This module makes the e-ink display work and renders
 # Command line arguments to set display type and colour, and enter your name
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--test", "-t", type=bool, default=False, help="Set to 'True' to output to local PNG instead of to the display")
-parser.add_argument("--random", "-r", type=bool, default=True, help="By default, this app picks a random account from a list to display a tweet. Set to 'False' to pick a specific username.")
+parser.add_argument("--test", "-t", type=bool, default=False, help="Set to 'true' to output to local PNG instead of to the display")
+parser.add_argument("--randomuser", "-r", type=bool, default=True, help="By default, this app picks a random account from a list to display a tweet. Set to 'False' to pick a specific username.")
 parser.add_argument("--username", "-u", type=str, help="Your Twitter handle without the @ symbol", default="unsplash")
 parser.add_argument("--nth", "-n", nargs="?", type=int, help="Get the nth latest tweet", default=1)
 parser.add_argument("--colour", "-c", nargs="?", type=str, help="Set colour of the display", default="yellow")
@@ -29,7 +30,11 @@ args = parser.parse_args()
 ## SET VARIABLES FROM THE COMMAND LINE ##
 #########################################
 
-twitterUsername = args.username
+if args.randomuser == True:
+    twitterUsername = random.choice(list(accounts))
+else:    
+    twitterUsername = args.username
+    
 twitterUsernameString = "@{}".format(twitterUsername)
 nthTweet = args.nth - 1 # API returns zero-based numbers, so the latest tweet to the end user would be n = 1 but should really be 0.
 
