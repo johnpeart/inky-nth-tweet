@@ -1,7 +1,14 @@
-# This list should contain account handles and display names
-# "handle": "display name",
+# This list should contain account handles without the @ symbol
 
 accounts = {
-    "bbcbreaking": "BBC Breaking News",
-    "verge": "The Verge"
+    "johnpeart",
+    "bbcbreaking",
+    "verge",
+    "life",
+    "imageofspace",
+    "big_picture",
+    "Brilliant_Ads",
+    "NatGeoPhotos",
+    "latimesphotos",
+    "smithsonian"
 }
