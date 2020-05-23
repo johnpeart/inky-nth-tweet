@@ -17,7 +17,8 @@ from inky import InkyWHAT # This module makes the e-ink display work and renders
 # Command line arguments to set display type and colour, and enter your name
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--test", "-t", type=bool, choices=[True], help="Set to 'true' to output to local PNG instead of to the display")
+parser.add_argument("--test", "-t", type=bool, default=False, help="Set to 'True' to output to local PNG instead of to the display")
+parser.add_argument("--random", "-r", type=bool, default=False, help="Set to 'True' to output to local PNG instead of to the display")
 parser.add_argument("--username", "-u", type=str, help="Your Twitter handle without the @ symbol", default="unsplash")
 parser.add_argument("--nth", "-n", nargs="?", type=int, help="Get the nth latest tweet", default=1)
 parser.add_argument("--colour", "-c", nargs="?", type=str, help="Set colour of the display", default="yellow")
