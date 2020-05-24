@@ -33,7 +33,7 @@ args = parser.parse_args()
 ## SET VARIABLES FROM THE COMMAND LINE ##
 #########################################
 
-if args.randomuser != True:
+if args.randomuser == True:
     twitterUsername = random.choice(list(accounts))
 else:    
     twitterUsername = args.username
@@ -239,7 +239,7 @@ elif urls != None:
     page = urllib2.urlopen(urls)
     soup = BeautifulSoup(page, 'html.parser')
     scrapedImage = soup.find('meta', attrs={'name': 'twitter:image'})
-    if scrapedImage['content'] != None:
+    if scrapedImage != None:
         print('Found an image:', scrapedImage['content'])
         response = requests.get(scrapedImage['content'])
         img = Image.open(StringIO(response.content))
@@ -256,13 +256,13 @@ elif urls != None:
         y1 = displayHeight - bannerHeight - 10
         textX0 = x0 + 5
         textY0 = displayHeight - tweetTextHeight - bannerHeight - bannerBorderThickness - 15
-        draw.rectangle([(x0, y0), (x1, y1)], fill = white, outline=None)
+        draw.rectangle([(x0, y0), (x1, y1)], fill = "white", outline=None)
         draw.text((textX0, textY0), reflowed_tweet, black, tweetFont)
     else:
         print('No image found. Reverting output to text only')
         img = Image.new("P", (displayWidth, displayHeight))
         draw = ImageDraw.Draw(img)
-        draw.rectangle([(0, 0), (displayWidth, displayHeight)], fill = white, outline=None)
+        draw.rectangle([(0, 0), (displayWidth, displayHeight)], fill = white)
         reflowed_tweet = reflow_text(text, displayWidth, tweetFont)
         draw.text((0, 0), reflowed_tweet, black, tweetFont)
 else:
