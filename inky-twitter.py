@@ -174,30 +174,35 @@ def getUserTimeline(handle, number):
     return statuses[number].full_text, statuses[number].media, statuses[number].retweet_count, statuses[number].favorite_count, statuses[number].id, statuses[number].urls
 
 if __name__ == "__main__":
+    print('Username', twitterUsername) # Print the username
     tweet = getUserTimeline(twitterUsername, nthTweet)
     text = tweet[0]
     text = re.sub(r"http\S+", "", text)
     media = tweet[1]
+    print('Media', media) # Print the media info
     if media != None:
         if media[0].type == "photo":
             mediaURL = media[0].media_url
         else:
             media = None
     retweets = human_format(tweet[2])
+    print('Retweets', retweets) # Print the retweets
     likes = human_format(tweet[3])
+    print('Likes', likes) # Print the likes
     id = tweet[4]
+    print('Tweet ID', id) # Print the tweet ID
     urls = tweet[5]
-    if urls != None:
+    print('URLs', urls) # Tweet any URLs
+    if urls != []:
         urls = urls[0].expanded_url
     else:
         urls = None
-    print('text: ', text, 'Media: ', media, 'Retweets: ', retweets, 'Likes: ', likes, 'ID: ', id, 'URLs: ', urls)
 
 ########################
 ## RENDER THE CONTENT ##
 ########################
 # These functions:
-# 1. Check to see if the tweet is text only or a media tweet
+# 1. Check to see if the tweet is text only, card or a media tweet
 # 2. If the tweet has media is a photo, generates a full screen image of the video and discards the text
 #    OR
 #    If the tweet does not have media, generates a full screen stylised image of the tweet's text
