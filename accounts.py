@@ -10,5 +10,22 @@ accounts = {
     "Brilliant_Ads",
     "NatGeoPhotos",
     "latimesphotos",
-    "smithsonian"
+    "smithsonian",
+    "lianafinck",
+    "Rabihalameddine",
+    "VeraCausa9",
+    "Neomechanica",
+    "Dog_rates",
+    "deviantART",
+    "artsy",
+    "FastCoDesign",
+    "techreview",
+    "thenextweb",
+    "spacex",
+    "nasa",
+    "10DowningSt",
+    "cslgbt",
+    "prideinlondon",
+    "isometric",
+    "crunchyroll"
 }
