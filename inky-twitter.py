@@ -33,7 +33,7 @@ args = parser.parse_args()
 ## SET VARIABLES FROM THE COMMAND LINE ##
 #########################################
 
-if args.randomuser == True:
+if args.randomuser != True:
     twitterUsername = random.choice(list(accounts))
 else:    
     twitterUsername = args.username
@@ -110,10 +110,10 @@ statsFontSize = 24
 # 1. "path/to/font" - where path/to/font is the path to the .ttf file
 # 2. font size - as an integer
 
-tweetFont = ImageFont.truetype("fonts/Regular.ttf", tweetFontSize)
-tweetSmallFont = ImageFont.truetype("fonts/Regular.ttf", tweetSmallFontSize)
-accountFont = ImageFont.truetype("fonts/Bold.ttf", accountFontSize)
-statsFont = ImageFont.truetype("fonts/Bold.ttf", statsFontSize)
+tweetFont = ImageFont.truetype("./inky-nth-tweet/fonts/Regular.ttf", tweetFontSize)
+tweetSmallFont = ImageFont.truetype("./inky-nth-tweet/fonts/Regular.ttf", tweetSmallFontSize)
+accountFont = ImageFont.truetype("./inky-nth-tweet/fonts/Bold.ttf", accountFontSize)
+statsFont = ImageFont.truetype("./inky-nth-tweet/fonts/Bold.ttf", statsFontSize)
 
 statsFontWidth, statsFontHeight = statsFont.getsize("ABCD ")
 
@@ -280,8 +280,8 @@ img = img.convert("RGB").quantize(palette=pal_img)
 
 # This section renders the bar at the bottom of the screen
 
-likeImage = Image.open('images/likes.png')
-rtImage = Image.open('images/rt.png')
+likeImage = Image.open('./inky-nth-tweet/images/likes.png')
+rtImage = Image.open('./inky-nth-tweet/images/rt.png')
 likeImage = likeImage.resize((resizedIcon, resizedIcon), resample=Image.NEAREST).convert("RGB").quantize(palette=pal_img)
 rtImage = rtImage.resize((resizedIcon, resizedIcon), resample=Image.NEAREST).convert("RGB").quantize(palette=pal_img)
 
@@ -324,7 +324,7 @@ inky.set_border(white)
 
 if test == True:
     print('Updating local image')
-    img.save("debug.png")
+    img.save("./inky-nth-tweet/debug.png")
 else:
     print('Updating Inky wHAT display')
     inky.show()
