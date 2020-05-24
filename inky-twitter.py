@@ -13,7 +13,7 @@ import keys # This module stores API credentials for use with the Twitter Develo
 from accounts import accounts # This module stores a list of accounts to check
 import twitter # This module handles interactions with the Twitter Developer API
 from bs4 import BeautifulSoup # This module helps with parsing HTML
-import urllib2 # This module helps with getting stuff from the interwebs
+import urllib, urllib2 # This module helps with getting stuff from the interwebs
 from PIL import Image, ImageFont, ImageDraw # This module handles creation of images and text, which are sent to the display
 import requests # This module helps with getting stuff from the interwebs
 from StringIO import StringIO
@@ -99,7 +99,7 @@ else:
 now = datetime.datetime.now()
 
 tweetFontSize = 16
-tweetSmallFontSize = 10
+tweetSmallFontSize = 12
 accountFontSize = 20
 statsFontSize = 24
 
@@ -134,7 +134,7 @@ def reflow_text(textToReflow, width, font):
     words = textToReflow.split(" ")
     reflowed = ''
     line_length = 0
-    line_count = 0
+    line_count = 1
 
     for i in range(len(words)):
         word = words[i] + " "
@@ -146,9 +146,10 @@ def reflow_text(textToReflow, width, font):
         else:
             line_length = word_length
             reflowed = reflowed[:-1] + "\n" + word
-            line_count += line_count + 1
+            line_count += 1
 
-    return reflowed
+    print(reflowed)
+    return reflowed, line_count
 
 ###########################
 ## HUMAN READABLE NUMERS ##
@@ -231,6 +232,19 @@ def cropImage(imageToProcess):
         y1 = y0 + mediaHeightCropped
     return img, x0, y0, x1, y1
 
+#########################################
+## AVOID PROCESSING ERRORS w/ SCRAPING ##
+#########################################
+
+headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+         'Referer': 'https://johnpe.art',
+         'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+         'Accept-Encoding': 'none',
+         'Accept-Language': 'en-US,en;q=0.8',
+         'Connection': 'keep-alive'}
+
+
 if media != None:
     print('Output is "media"')
     response = requests.get(mediaURL)
@@ -241,7 +255,8 @@ if media != None:
     img = img.crop((cropping[1], cropping[2], cropping[3], cropping[4]))
 elif urls != None:
     print('Output is "urls"')
-    page = urllib2.urlopen(urls)
+    req = urllib2.Request(urls, headers = headers)
+    page = urllib2.urlopen(req)
     soup = BeautifulSoup(page, 'html.parser')
     scrapedImage = soup.find('meta', attrs={'name': 'twitter:image'})
     if scrapedImage != None:
@@ -252,24 +267,26 @@ elif urls != None:
         img = cropping[0]
         img = img.crop((cropping[1], cropping[2], cropping[3], cropping[4]))
         draw = ImageDraw.Draw(img)
-        reflowed_tweet = reflow_text(text, (displayWidth - 30), tweetSmallFont)
-        tweetTextWidth, tweetTextHeight = tweetFont.getsize(reflowed_tweet)
-        print("Text height: ", tweetTextHeight)
-        x0 = 10
-        y0 = displayHeight - tweetTextHeight - bannerHeight - bannerBorderThickness - 20
-        x1 = displayWidth - 10
-        y1 = displayHeight - bannerHeight - 10
-        textX0 = x0 + 5
-        textY0 = displayHeight - tweetTextHeight - bannerHeight - bannerBorderThickness - 15
+        reflowedTextWidth = (displayWidth - 30)
+        reflowedTweet = reflow_text(text, reflowedTextWidth, tweetSmallFont)
+        tweet, lineCount = reflowedTweet
+        x0 = int(10)
+        y0 = int(displayHeight - bannerHeight - bannerBorderThickness - bannerPadding - 10 - (lineCount * (1.5 * tweetSmallFontSize)))
+        x1 = int(displayWidth - 10)
+        y1 = int(displayHeight - bannerHeight - 10)
         draw.rectangle([(x0, y0), (x1, y1)], fill = "white", outline=None)
-        draw.text((textX0, textY0), reflowed_tweet, black, tweetFont)
+        textX0 = int(x0 + 5)
+        textY0 = int(y0 + 5)
+        print(x0, y0, x1, y1, textX0, textY0)
+        draw.text((textX0, textY0), tweet, black, tweetSmallFont)
+        print ('Line count', lineCount)
     else:
         print('No image found. Reverting output to text only')
         img = Image.new("P", (displayWidth, displayHeight))
         draw = ImageDraw.Draw(img)
         draw.rectangle([(0, 0), (displayWidth, displayHeight)], fill = white)
-        reflowed_tweet = reflow_text(text, displayWidth, tweetFont)
-        draw.text((0, 0), reflowed_tweet, black, tweetFont)
+        reflowedTweet = reflow_text(text, displayWidth, tweetFont)
+        draw.text((0, 0), reflowedTweet, black, tweetFont)
 else:
     print('Output is "text"')
     img = Image.new("P", (displayWidth, displayHeight))
@@ -303,7 +320,6 @@ accountFontWidth, accountFontHeight = accountFont.getsize(twitterUsernameString)
 accountVHeight = displayHeight - (bannerHeight / 2) - (accountFontHeight * 0.5)
 
 ImageDraw.Draw(img).text(((displayWidth - accountFontWidth - bannerPadding), accountVHeight), twitterUsernameString, yellow, accountFont)
-
 
 ########################
 ## FINALISE THE IMAGE ##
