@@ -23,7 +23,7 @@ accounts = {
     "thenextweb",
     "spacex",
     "nasa",
-    "10DowningSt",
+    "10DowningStreet",
     "cslgbt",
     "prideinlondon",
     "isometric",
