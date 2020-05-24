@@ -100,7 +100,7 @@ now = datetime.datetime.now()
 
 tweetFontSize = 16
 tweetSmallFontSize = 12
-accountFontSize = 20
+accountFontSize = 16
 statsFontSize = 24
 
 ##########################
@@ -130,7 +130,7 @@ statsVHeight = displayHeight - (bannerHeight / 2) - (statsFontHeight * 2/3)
 # This function reflows text across multiple lines.
 # It is adapted from the Pimoroni guidance for the Inky wHAT.
 
-def reflow_text(textToReflow, width, font):
+def reflowText(textToReflow, width, font):
     words = textToReflow.split(" ")
     reflowed = ''
     line_length = 0
@@ -268,7 +268,7 @@ elif urls != None:
         img = img.crop((cropping[1], cropping[2], cropping[3], cropping[4]))
         draw = ImageDraw.Draw(img)
         reflowedTextWidth = (displayWidth - 30)
-        reflowedTweet = reflow_text(text, reflowedTextWidth, tweetSmallFont)
+        reflowedTweet = reflowText(text, reflowedTextWidth, tweetSmallFont)
         tweet, lineCount = reflowedTweet
         x0 = int(10)
         y0 = int(displayHeight - bannerHeight - bannerBorderThickness - bannerPadding - 10 - (lineCount * (1.5 * tweetSmallFontSize)))
@@ -284,17 +284,18 @@ elif urls != None:
         print('No image found. Reverting output to text only')
         img = Image.new("P", (displayWidth, displayHeight))
         draw = ImageDraw.Draw(img)
-        draw.rectangle([(0, 0), (displayWidth, displayHeight)], fill = white)
-        reflowedTweet = reflow_text(text, displayWidth, tweetFont)
-        draw.text((0, 0), reflowedTweet, black, tweetFont)
+        draw.rectangle([(0, 0), (displayWidth, displayHeight)], fill = "white")
+        reflowedTweet = reflowText(text, displayWidth, tweetFont)
+        tweet, lineCount = reflowedTweet
+        draw.text((0, 0), tweet, black, tweetFont)
 else:
     print('Output is "text"')
     img = Image.new("P", (displayWidth, displayHeight))
     draw = ImageDraw.Draw(img)
     draw.rectangle([(0, 0), (displayWidth, displayHeight)], fill = white, outline=None)
-    reflowed_tweet = reflow_text(text, displayWidth, tweetFont)
-    draw.text((0, 0), reflowed_tweet, black, tweetFont)
-    tweetTextWidth, tweetTextHeight = accountFont.getsize(reflowed_tweet)
+    reflowedTweet = reflowText(text, displayWidth, tweetFont)
+    tweet, lineCount = reflowedTweet
+    draw.text((0, 0), tweet, black, tweetFont)
 
 pal_img = Image.new("P", (1, 1))
 pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)
