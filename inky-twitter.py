@@ -81,18 +81,15 @@ inky = InkyWHAT(inkyColour)
 ## SET GLOBAL VARIABLES ##
 ##########################
 
+yellow = "#9B870C"
+red = "#9B870C"
+white = "#ffffff"
+black = "#000000"
+
 if test == True:
-    yellow = "#9B870C"
-    red = "#9B870C"
-    white = "#ffffff"
-    black = "#000000"
     displayHeight = 300
     displayWidth = 400
 else:
-    yellow = inky.YELLOW
-    red = inky.RED
-    white = inky.WHITE
-    black = inky.BLACK
     displayHeight = inky.HEIGHT
     displayWidth = inky.WIDTH
 
@@ -274,7 +271,7 @@ elif urls != None:
         y0 = int(displayHeight - bannerHeight - bannerBorderThickness - bannerPadding - 10 - (lineCount * (1.5 * tweetSmallFontSize)))
         x1 = int(displayWidth - 10)
         y1 = int(displayHeight - bannerHeight - 10)
-        draw.rectangle([(x0, y0), (x1, y1)], fill = "white", outline=None)
+        draw.rectangle([(x0, y0), (x1, y1)], fill = white, outline=None)
         textX0 = int(x0 + 5)
         textY0 = int(y0 + 5)
         print(x0, y0, x1, y1, textX0, textY0)
@@ -284,18 +281,18 @@ elif urls != None:
         print('No image found. Reverting output to text only')
         img = Image.new("P", (displayWidth, displayHeight))
         draw = ImageDraw.Draw(img)
-        draw.rectangle([(0, 0), (displayWidth, displayHeight)], fill = "white")
-        reflowedTweet = reflowText(text, displayWidth, tweetFont)
+        draw.rectangle([(0, 0), (displayWidth, displayHeight)], fill = white, outline=None)
+        reflowedTweet = reflowText(text, (displayWidth - 20), tweetFont)
         tweet, lineCount = reflowedTweet
-        draw.text((0, 0), tweet, black, tweetFont)
+        draw.text((20, 20), tweet, black, tweetFont)
 else:
     print('Output is "text"')
     img = Image.new("P", (displayWidth, displayHeight))
     draw = ImageDraw.Draw(img)
     draw.rectangle([(0, 0), (displayWidth, displayHeight)], fill = white, outline=None)
-    reflowedTweet = reflowText(text, displayWidth, tweetFont)
+    reflowedTweet = reflowText(text, (displayWidth - 20), tweetFont)
     tweet, lineCount = reflowedTweet
-    draw.text((0, 0), tweet, black, tweetFont)
+    draw.text((20, 20), tweet, black, tweetFont)
 
 pal_img = Image.new("P", (1, 1))
 pal_img.putpalette((255, 255, 255, 0, 0, 0, 255, 0, 0) + (0, 0, 0) * 252)
