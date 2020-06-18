@@ -1,31 +1,13 @@
 # This list should contain account handles without the @ symbol
 
 accounts = {
-    "johnpeart",
-    "bbcbreaking",
     "verge",
-    "life",
-    "imageofspace",
-    "big_picture",
-    "Brilliant_Ads",
     "NatGeoPhotos",
     "latimesphotos",
     "smithsonian",
-    "lianafinck",
-    "Rabihalameddine",
-    "VeraCausa9",
-    "Neomechanica",
     "Dog_rates",
     "deviantART",
-    "artsy",
-    "FastCoDesign",
-    "techreview",
-    "thenextweb",
-    "spacex",
-    "nasa",
-    "10DowningStreet",
-    "cslgbt",
-    "prideinlondon",
     "isometric",
-    "crunchyroll"
+    "crunchyroll",
+    "keithharingfdn"
 }
